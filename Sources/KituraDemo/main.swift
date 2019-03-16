@@ -11,6 +11,23 @@ Log.logger = helium
 
 let router = Router()
 
+router.all("/request-info") { (request, response, next) in
+    response.send("You are accessing \(request.hostname) on port \(request.port).\n")
+
+    // request.method contains the req method as a RouterMethod enum case
+    // but we can use rawValue prop to get the method as a printable string
+    response.send("The request method was \(request.method.rawValue).\n")
+
+    // request headesr are in the headers prop, which itself is an instance of a
+    // Headers struct. The important thing is that it's subscriptable so it can
+    // be treated like a simple [String: String] dict
+    if let agent = request.headers["User-Agent"] {
+        response.send("Your user-agent is \(agent).\n")
+    }
+
+    next()
+}
+
 router.get("/") { (request, response, next) in
     defer {
         next()
@@ -21,7 +38,7 @@ router.get("/") { (request, response, next) in
     response.send("Hello world!\n")
 }
 
-router.get("/") { request, response, next in
+router.get("/") { (request, response, next) in
     Log.warning("Something looks fishy!")
     Log.error("OH NO!")
 
@@ -29,6 +46,17 @@ router.get("/") { request, response, next in
 
     next()
 }
+
+router.get("/hello-you") { (request, response, next) in
+    if let name = request.queryParameters["name"] {
+        response.send("Hello, \(name)!\n")
+    } else {
+        response.send("Hello, whatever your name is!\n")
+    }
+
+    next()
+}
+
 
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
