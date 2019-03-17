@@ -63,6 +63,19 @@ router.get("/admin") { (request, response, next) in
     next()
 }
 
+router.get("/custom-headers") { (request, response, next) in
+    response.headers["X-Generator"] = "Kitura!"
+    response.headers.setType("text/plain", charset: "utf-8")
+    response.send("Hello!")
+    next()
+}
+
+router.get("/redirect") { (request, response, next) in
+    // redirect client to home page
+    try? response.redirect("/", status: .movedPermanently)
+    next()
+}
+
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
 
