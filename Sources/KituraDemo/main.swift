@@ -57,6 +57,11 @@ router.get("/hello-you") { (request, response, next) in
     next()
 }
 
+router.get("/admin") { (request, response, next) in
+    response.status(.forbidden)
+    response.send("Hey, you don't have permission to do that!")
+    next()
+}
 
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
