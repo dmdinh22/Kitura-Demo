@@ -83,6 +83,27 @@ router.get("/stock-data") { (request, response, next) in
     next()
 }
 
+router.get("/calc") { (request, response, next) in
+    guard let paramA = request.queryParameters["a"], let paramB = request.queryParameters["b"] else {
+        response.status(.badRequest)
+        response.send("param a or b is missing\n")
+        Log.error("param missing from the request")
+        return
+    }
+
+    guard let valueA = Float(paramA), let valueB = Float(paramB) else {
+        response.status(.badRequest)
+        response.send("param a or b could not be converted to a Float\n")
+        Log.error("Parameter uncastable")
+        return
+    }
+
+    let sum = valueA + valueB
+    Log.info("Successfully added a+b: \(sum)")
+    response.send("The calculation resulted in \(sum)\n")
+    next()
+}
+
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
 
