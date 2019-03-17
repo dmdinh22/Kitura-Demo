@@ -76,6 +76,13 @@ router.get("/redirect") { (request, response, next) in
     next()
 }
 
+router.get("/stock-data") { (request, response, next) in
+    // completely made up stock value data
+    let stockData = ["AAPL": 120.44, "MSFT": 88.48, "IBM": 74.11, "DVMT": 227.44]
+    response.send(json: stockData)
+    next()
+}
+
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
 
