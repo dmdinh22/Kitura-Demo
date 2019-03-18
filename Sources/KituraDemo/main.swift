@@ -214,7 +214,10 @@ router.get("/albums") { (request, response, next) in
     let albumSchema = Album()
     let titleQuery = Select(albumSchema.Title, from: albumSchema)
         .order(by: .ASC(albumSchema.Title))
-    
+
+    // check the SQL query built by Kuery API
+    print(try! titleQuery.build(queryBuilder: cxn.queryBuilder))
+
     cxn.execute(query: titleQuery) { queryResult in
         if let rows = queryResult.asRows {
             for row in rows {
