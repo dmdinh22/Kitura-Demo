@@ -127,15 +127,13 @@ router.post("/some-path") { (request, response, next) in
 }
 
 // ## PATH PARAMS ##
-router.get("/post/1") { (request, response, next) in
-    // load & show post 1
+router.get("/post/:postId") { (request, response, next) in
+    let postId = request.parameters["postId"]!
+    response.send("Now showing post #\(postId)\n")
+    // load & show post according to param
     next()
 }
 
-router.get("/post/2") { (request, response, next) in
-    // load & show post 2
-    next()
-}
 
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
