@@ -79,9 +79,23 @@ router.get("/hello-you") { (request, response, next) in
     next()
 }
 
+// add middleware to route for ALL HTTP requests
+// allowPartialMatch will block middleware from firing on subpaths
+router.all("/admin", allowPartialMatch: false, middleware: detector)
 router.get("/admin") { (request, response, next) in
     response.status(.forbidden)
     response.send("Hey, you don't have permission to do that!")
+    next()
+}
+
+router.get("/admin/subpath") { (request, response, next) in
+    guard let ffStatus = request.userInfo["usingFirefox"] as? Bool else {
+        response.send("Oops! Our middleware didn't run...")
+        next()
+        return
+    }
+
+    response.send("The middleware ran.")
     next()
 }
 
