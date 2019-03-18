@@ -1,8 +1,27 @@
 import Foundation
+import HeliumLogger
 import Kitura
 import KituraFirefoxDetector
-import HeliumLogger
 import LoggerAPI
+import SwiftKuery
+import SwiftKuerySQLite
+
+// Using NSString below is gross, but it lets us use the very handy
+// expandingTildeInPath property. Unfortunately no equivalent exists in the
+// Swift standard library or elsewhere in Foundation.
+// Don't forget to change this path to where you copied the file on your system!
+let path = NSString(string: "~/repos/KituraDemo/Chinook_Sqlite.sqlite").expandingTildeInPath
+
+let cxn = SQLiteConnection(filename: String(path))
+
+cxn.connect() { error in
+    if error == nil {
+        print("Success opening database.")
+    }
+    else if let error = error {
+        print("Error opening database: \(error.description)")
+    }
+}
 
 // custom logging
 let helium = HeliumLogger(.verbose)
@@ -188,6 +207,18 @@ router.get("/:author/post/:postId") { (request, response, next) in
     let postId = request.parameters["postId"]!
     response.send("Now showing post #\(postId) by \(author)\n")
     // load & show post according to author & param
+    next()
+}
+
+router.get("/albums") { request, response, next in
+    cxn.execute("SELECT Title FROM Album ORDER BY Title ASC") { queryResult in
+        if let rows = queryResult.asRows {
+            for row in rows {
+                let title = row["Title"] as! String
+                response.send(title + "\n")
+            }
+        }
+    }
     next()
 }
 
