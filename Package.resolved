@@ -65,6 +65,15 @@
         }
       },
       {
+        "package": "KituraFirefoxDetector",
+        "repositoryURL": "https://github.com/dmdinh22/KituraFirefoxDetector.git",
+        "state": {
+          "branch": null,
+          "revision": "c805f2f29de325d8836c3fdd4d62f1dd065dd949",
+          "version": "0.0.1"
+        }
+      },
+      {
         "package": "LoggerAPI",
         "repositoryURL": "https://github.com/IBM-Swift/LoggerAPI.git",
         "state": {

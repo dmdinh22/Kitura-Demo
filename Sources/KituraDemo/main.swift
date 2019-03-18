@@ -1,4 +1,6 @@
+import Foundation
 import Kitura
+import KituraFirefoxDetector
 import HeliumLogger
 import LoggerAPI
 
@@ -10,6 +12,26 @@ Log.logger = helium
 //HeliumLogger.use()
 
 let router = Router()
+let detector = FirefoxDetector()
+
+// declare middleware for path
+router.get("/ffcheck", middleware: detector)
+
+// add handler
+router.get("/ffcheck") { (request, response, next) in
+    guard let ffStatus = request.userInfo["usingFirefox"] as? Bool else {
+        response.send("Oops! Our middleware didn't run.")
+        next()
+        return
+    }
+
+    if ffStatus {
+        response.send("Congrats! You're a FireFox user!")
+    } else {
+        response.send("Hey! You need to use FireFox to get the cool status.")
+    }
+    next()
+}
 
 router.all("/request-info") { (request, response, next) in
     response.send("You are accessing \(request.hostname) on port \(request.port).\n")
@@ -139,6 +161,7 @@ router.post("/some-path") { (request, response, next) in
 //}
 
 // using regex to define path param instead
+// ^ and $ regex tokens are implicitly added by Kitura
 router.get("/post/:postId(\\d+)") { (request, response, next) in
     let postId = request.parameters["postId"]!
     response.send("Now showing post #\(postId)\n")
