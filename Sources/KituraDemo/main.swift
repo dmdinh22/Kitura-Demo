@@ -210,8 +210,12 @@ router.get("/:author/post/:postId") { (request, response, next) in
     next()
 }
 
-router.get("/albums") { request, response, next in
-    cxn.execute("SELECT Title FROM Album ORDER BY Title ASC") { queryResult in
+router.get("/albums") { (request, response, next) in
+    let albumSchema = Album()
+    let titleQuery = Select(albumSchema.Title, from: albumSchema)
+        .order(by: .ASC(albumSchema.Title))
+    
+    cxn.execute(query: titleQuery) { queryResult in
         if let rows = queryResult.asRows {
             for row in rows {
                 let title = row["Title"] as! String
