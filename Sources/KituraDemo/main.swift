@@ -239,12 +239,12 @@ router.get("/albums/:letter([a-z])") { (request, response, next) in
 
     // sanitize param values
     let titleQuery = Select(albumSchema.Title, from: albumSchema)
-        .where(albumSchema.Title.like(letter + "%"))//.like(Parameter("searchLetter")))
+        .where(albumSchema.Title.like(Parameter("searchLetter")))
         .order(by: .ASC(albumSchema.Title))
 
-//    let parameters: [String: Any?] = ["searchLetter": letter + "%"]
+    let parameters: [String: Any?] = ["searchLetter": letter + "%"]
 
-    cxn.execute(query: titleQuery) { queryResult in
+    cxn.execute(query: titleQuery, parameters: parameters) { queryResult in
         if let rows = queryResult.asRows {
             for row in rows {
                 let title = row["Title"] as! String
