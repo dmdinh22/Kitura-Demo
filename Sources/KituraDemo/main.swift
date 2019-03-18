@@ -104,6 +104,39 @@ router.get("/calc") { (request, response, next) in
     next()
 }
 
+router.get("/get-only") { (request, response, next) in
+    response.send("GET Success!\n")
+    next()
+}
+
+router.lock("/lock-only") { (request, response, next) in
+    response.send("LOCK success!\n")
+    next()
+}
+
+// requests to /some-path w/ methods other than GET or POST will still
+// automatically result in a "404 Not Found" response
+router.get("/some-path") { (request, response, next) in
+    // do something
+    next()
+}
+
+router.post("/some-path") { (request, response, next) in
+    // do something else
+    next()
+}
+
+// ## PATH PARAMS ##
+router.get("/post/1") { (request, response, next) in
+    // load & show post 1
+    next()
+}
+
+router.get("/post/2") { (request, response, next) in
+    // load & show post 2
+    next()
+}
+
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
 
