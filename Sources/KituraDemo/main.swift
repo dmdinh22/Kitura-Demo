@@ -229,6 +229,32 @@ router.get("/albums") { (request, response, next) in
     next()
 }
 
+router.get("/albums/:letter") { (request, response, next) in
+    guard let letter = request.parameters["letter"] else {
+        response.status(.notFound)
+        return
+    }
+
+    let albumSchema = Album()
+
+    // sanitize param values
+    let titleQuery = Select(albumSchema.Title, from: albumSchema)
+        .where(albumSchema.Title.like(Parameter("searchLetter")))
+        .order(by: .ASC(albumSchema.Title))
+
+    let parameters: [String: Any?] = ["searchLetter": letter + "%"]
+
+    cxn.execute(query: titleQuery, parameters: parameters) { queryResult in
+        if let rows = queryResult.asRows {
+            for row in rows {
+                let title = row["Title"] as! String
+                response.send(title + "\n")
+            }
+        }
+    }
+
+    next()
+}
 
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
