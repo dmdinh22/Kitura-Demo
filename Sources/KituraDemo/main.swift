@@ -127,10 +127,30 @@ router.post("/some-path") { (request, response, next) in
 }
 
 // ## PATH PARAMS ##
-router.get("/post/:postId") { (request, response, next) in
+//router.get("/post/:postId") { (request, response, next) in
+//    guard let postId = request.parameters["postId"], let postIdAsInt = UInt(postId) else {
+//        response.status(.notFound)
+//        response.send("The post ID provided is not a number.\n")
+//        return
+//    }
+//    response.send("Now showing post #\(postIdAsInt)\n")
+//    // load & show post according to param
+//    next()
+//}
+
+// using regex to define path param instead
+router.get("/post/:postId(\\d+)") { (request, response, next) in
     let postId = request.parameters["postId"]!
     response.send("Now showing post #\(postId)\n")
     // load & show post according to param
+    next()
+}
+
+router.get("/:author/post/:postId") { (request, response, next) in
+    let author = request.parameters["author"]!
+    let postId = request.parameters["postId"]!
+    response.send("Now showing post #\(postId) by \(author)\n")
+    // load & show post according to author & param
     next()
 }
 
