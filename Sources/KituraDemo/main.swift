@@ -256,6 +256,30 @@ router.get("/albums/:letter([a-z])") { (request, response, next) in
     next()
 }
 
+router.get("/songs/:letter([a-z])") { (request, response, next) in
+    let letter = request.parameters["letter"]!
+    let albumSchema = Album()
+    let trackSchema = Track()
+
+    let query = Select(trackSchema.Name, trackSchema.Composer, albumSchema.Title, from: trackSchema)
+        .join(albumSchema).on(trackSchema.AlbumId == albumSchema.AlbumId)
+        .where(trackSchema.Name.like(letter + "%"))
+        .order(by: .ASC(trackSchema.Name))
+
+    cxn.execute(query: query) { queryResult in
+        if let rows = queryResult.asRows {
+            for row in rows {
+                let trackName = row["Name"] as! String
+                let composer = row["Composer"] as! String? ?? "composer unknown"
+                let albumName = row["Title"] as! String
+                response.send("\(trackName) by \(composer) from \(albumName)\n")
+            }
+        }
+    }
+    
+    next()
+}
+
 // start server on provided port using router instance
 Kitura.addHTTPServer(onPort: 8080, with: router)
 
