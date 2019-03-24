@@ -211,7 +211,7 @@ router.get("/:author/post/:postId") { (request, response, next) in
 }
 
 router.get("/albums") { (request, response, next) in
-    let albumSchema = Album()
+    let albumSchema = AlbumTable()
     let titleQuery = Select(albumSchema.Title, from: albumSchema)
         .order(by: .ASC(albumSchema.Title))
 
@@ -229,37 +229,62 @@ router.get("/albums") { (request, response, next) in
     next()
 }
 
-router.get("/albums/:letter([a-z])") { (request, response, next) in
-    guard let letter = request.parameters["letter"] else {
-        response.status(.notFound)
-        return
-    }
+//router.get("/albums/:letter([a-z])") { (request, response, next) in
+//    guard let letter = request.parameters["letter"] else {
+//        response.status(.notFound)
+//        return
+//    }
+//
+//    let albumSchema = AlbumTable()
+//
+//    // sanitize param values
+//    let titleQuery = Select(albumSchema.Title, from: albumSchema)
+//        .where(albumSchema.Title.like(Parameter("searchLetter")))
+//        .order(by: .ASC(albumSchema.Title))
+//
+//    let parameters: [String: Any?] = ["searchLetter": letter + "%"]
+//
+//    cxn.execute(query: titleQuery, parameters: parameters) { queryResult in
+//        if let rows = queryResult.asRows {
+//            for row in rows {
+//                let title = row["Title"] as! String
+//                response.send(title + "\n")
+//            }
+//        }
+//    }
+//
+//    next()
+//}
+//
+//router.get("/songs/:letter([a-z])") { (request, response, next) in
+//    let letter = request.parameters["letter"]!
+//    let albumSchema = AlbumTable()
+//    let trackSchema = TrackTable()
+//
+//    let query = Select(trackSchema.Name, trackSchema.Composer, albumSchema.Title, from: trackSchema)
+//        .join(albumSchema).on(trackSchema.AlbumId == albumSchema.AlbumId)
+//        .where(trackSchema.Name.like(letter + "%"))
+//        .order(by: .ASC(trackSchema.Name))
+//
+//    cxn.execute(query: query) { queryResult in
+//        if let rows = queryResult.asRows {
+//            for row in rows {
+//                let trackName = row["Name"] as! String
+//                let composer = row["Composer"] as! String? ?? "composer unknown"
+//                let albumName = row["Title"] as! String
+//                response.send("\(trackName) by \(composer) from \(albumName)\n")
+//            }
+//        }
+//    }
+//    
+//    next()
+//}
 
-    let albumSchema = Album()
-
-    // sanitize param values
-    let titleQuery = Select(albumSchema.Title, from: albumSchema)
-        .where(albumSchema.Title.like(Parameter("searchLetter")))
-        .order(by: .ASC(albumSchema.Title))
-
-    let parameters: [String: Any?] = ["searchLetter": letter + "%"]
-
-    cxn.execute(query: titleQuery, parameters: parameters) { queryResult in
-        if let rows = queryResult.asRows {
-            for row in rows {
-                let title = row["Title"] as! String
-                response.send(title + "\n")
-            }
-        }
-    }
-
-    next()
-}
-
-router.get("/songs/:letter([a-z])") { (request, response, next) in
+router.get("songs/:letter") { request, response, next in
     let letter = request.parameters["letter"]!
-    let albumSchema = Album()
-    let trackSchema = Track()
+
+    let albumSchema = AlbumTable()
+    let trackSchema = TrackTable()
 
     let query = Select(trackSchema.Name, trackSchema.Composer, albumSchema.Title, from: trackSchema)
         .join(albumSchema).on(trackSchema.AlbumId == albumSchema.AlbumId)
@@ -268,15 +293,43 @@ router.get("/songs/:letter([a-z])") { (request, response, next) in
 
     cxn.execute(query: query) { queryResult in
         if let rows = queryResult.asRows {
+            var tracks: [Track] = []
             for row in rows {
-                let trackName = row["Name"] as! String
-                let composer = row["Composer"] as! String? ?? "composer unknown"
-                let albumName = row["Title"] as! String
-                response.send("\(trackName) by \(composer) from \(albumName)\n")
+                do {
+                    let track = try! Track(fromRow: row)
+                    tracks.append(track)
+                }
+                catch {
+                    Log.error("Failed to initialize a track from a row.")
+                }
+            }
+
+            response.headers["Vary"] = "Accept"
+            let output: String
+            switch request.accepts(types: ["text/json", "text/xml"]) {
+            case "text/json"?:
+                response.headers["Content-Type"] = "text/json"
+                output = "Not yet implemented. :("
+                response.send(output)
+                break
+            case "text/xml"?:
+                response.headers["Content-Type"] = "text/xml"
+                output = "Not yet implemented. :("
+                response.send(output)
+                break
+            default:
+                response.status(.notAcceptable)
+                next()
+                return
             }
         }
+
+        else if let queryError = queryResult.asError {
+            let builtQuery = try! query.build(queryBuilder: cxn.queryBuilder)
+            response.status(.internalServerError)
+            response.send("Database error: \(queryError.localizedDescription) - Query: \(builtQuery)")
+        }
     }
-    
     next()
 }
 

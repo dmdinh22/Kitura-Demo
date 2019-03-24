@@ -1,13 +1,13 @@
 import SwiftKuery
 import SwiftKuerySQLite
 
-class Album: Table {
+class AlbumTable: Table {
     let tableName = "Album"
     let AlbumId = Column("AlbumId")
     let Title = Column("Title")
 }
 
-class Track: Table {
+class TrackTable: Table {
     let tableName = "Track"
     let Name = Column("Name")
     let AlbumId = Column("AlbumId")
