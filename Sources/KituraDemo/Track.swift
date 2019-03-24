@@ -1,6 +1,6 @@
 import Foundation
 
-struct Track {
+struct Track: Codable {
     var name: String
     var composer: String?
     var albumTitle: String

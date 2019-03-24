@@ -276,7 +276,7 @@ router.get("/albums") { (request, response, next) in
 //            }
 //        }
 //    }
-//    
+//
 //    next()
 //}
 
@@ -309,8 +309,16 @@ router.get("songs/:letter") { request, response, next in
             switch request.accepts(types: ["text/json", "text/xml"]) {
             case "text/json"?:
                 response.headers["Content-Type"] = "text/json"
-                output = "Not yet implemented. :("
-                response.send(output)
+                let encoder: JSONEncoder = JSONEncoder()
+                do {
+                    let jsonData: Data = try encoder.encode(tracks)
+                    output = String(data: jsonData, encoding: .utf8)!
+                    response.send(output)
+                }
+                catch {
+                    response.status(.internalServerError)
+                    Log.error("Failed to JSON encode track list.")
+                }
                 break
             case "text/xml"?:
                 response.headers["Content-Type"] = "text/xml"
