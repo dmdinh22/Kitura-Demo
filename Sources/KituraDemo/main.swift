@@ -322,7 +322,13 @@ router.get("songs/:letter") { request, response, next in
                 break
             case "text/xml"?:
                 response.headers["Content-Type"] = "text/xml"
-                output = "Not yet implemented. :("
+                let tracksElement: XMLElement = XMLElement(name: "tracks")
+                for track in tracks {
+                    tracksElement.addChild(track.asXmlElement())
+                }
+                let tracksDoc: XMLDocument = XMLDocument(rootElement: tracksElement)
+                let xmlData: Data = tracksDoc.xmlData
+                output = String(data: xmlData, encoding: .utf8)!
                 response.send(output)
                 break
             default:

@@ -18,5 +18,18 @@ struct Track: Codable {
         albumTitle = rowTitle
         composer = row["Composer"] as? String
     }
+
+    func asXmlElement() -> XMLElement {
+        let trackElement: XMLElement = XMLElement(name: "track")
+        let nameElement: XMLElement = XMLElement(name: "name", stringValue: name)
+        let composerElement: XMLElement = XMLElement(name: "composer", stringValue: composer)
+        let albumTitleElement: XMLElement = XMLElement(name: "albumTitle", stringValue: albumTitle)
+        
+        trackElement.addChild(nameElement)
+        trackElement.addChild(composerElement)
+        trackElement.addChild(albumTitleElement)
+
+        return trackElement
+    }
 }
 
