@@ -19,3 +19,4 @@ struct Track {
         composer = row["Composer"] as? String
     }
 }
+
