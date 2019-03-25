@@ -350,7 +350,7 @@ router.get("songs/:letter") { request, response, next in
 }
 
 // hello.stencil route
-router.get("/hello/:name") { request, response, next in
+router.get("/hello/:name?") { request, response, next in
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     let name = request.parameters["name"] as Any
     try response.render("hello", context: ["name": name])
