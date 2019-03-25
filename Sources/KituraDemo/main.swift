@@ -2,6 +2,7 @@ import Foundation
 import HeliumLogger
 import Kitura
 import KituraFirefoxDetector
+import KituraStencil
 import LoggerAPI
 import SwiftKuery
 import SwiftKuerySQLite
@@ -32,6 +33,7 @@ Log.logger = helium
 
 let router = Router()
 let detector = FirefoxDetector()
+router.setDefault(templateEngine: StencilTemplateEngine())
 
 // declare middleware for path
 router.get("/ffcheck", middleware: detector)
@@ -344,6 +346,14 @@ router.get("songs/:letter") { request, response, next in
             response.send("Database error: \(queryError.localizedDescription) - Query: \(builtQuery)")
         }
     }
+    next()
+}
+
+// hello.stencil route
+router.get("/hello/:name") { request, response, next in
+    response.headers["Content-Type"] = "text/html; charset=utf-8"
+    let name = request.parameters["name"] as Any
+    try response.render("hello", context: ["name": name])
     next()
 }
 
