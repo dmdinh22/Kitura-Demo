@@ -1,0 +1,32 @@
+{% extends "layout.stencil" %}
+
+{% block pageTitle %}Songs that start with {{ letter }}{% endblock %}
+
+{% block pageContent %}
+<h2>These are the songs in my collection that starts w/ the letter {{ letter }}.</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Artist</th>
+      <th>Album</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- spin through the tracks list -->
+    {% for track in tracks %}
+      <tr>
+        <td>{{ track.name }}</td>
+        <td>{{ track.composer|default:"(unknown)" }}</td>
+        <td>{{ track.album }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="3">
+          There are no songs that begin with {{ letter }}.
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

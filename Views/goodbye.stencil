@@ -1,0 +1,9 @@
+{% extends "layout.stencil" %}
+
+{% block pageTitle %}Goodbye!{% endblock %}
+
+{% block pageContent %}
+<p>
+    Goodbye, {{ name|default:"Everyone" }}!
+</p>
+{% endblock %}

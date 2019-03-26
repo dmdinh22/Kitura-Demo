@@ -308,7 +308,7 @@ router.get("songs/:letter") { request, response, next in
 
             response.headers["Vary"] = "Accept"
             let output: String
-            switch request.accepts(types: ["text/json", "text/xml"]) {
+            switch request.accepts(types: ["text/json", "text/xml", "text/html"]) {
             case "text/json"?:
                 response.headers["Content-Type"] = "text/json"
                 let encoder: JSONEncoder = JSONEncoder()
@@ -333,6 +333,19 @@ router.get("songs/:letter") { request, response, next in
                 output = String(data: xmlData, encoding: .utf8)!
                 response.send(output)
                 break
+            case "text/html"?:
+                response.headers["Content-Type"] = "text/html; charset=utf-8"
+                var sanitized: [[String: String?]] = []
+                for track in tracks {
+                    sanitized.append([
+                        "name": track.name.webSanitize(),
+                        "composer": track.composer?.webSanitize(),
+                        "album": track.albumTitle.webSanitize()
+                    ])
+                }
+                let context = ["letter": letter as Any, "tracks": sanitized as Any]
+                try! response.render("songs", context: context)
+                break
             default:
                 response.status(.notAcceptable)
                 next()
@@ -352,8 +365,18 @@ router.get("songs/:letter") { request, response, next in
 // hello.stencil route
 router.get("/hello/:name?") { request, response, next in
     response.headers["Content-Type"] = "text/html; charset=utf-8"
-    let name = request.parameters["name"] as Any
-    try response.render("hello", context: ["name": name])
+    let name = request.parameters["name"]
+    let context: [String: Any] = ["name": name?.webSanitize() as Any]
+    try response.render("hello", context: context)
+    next()
+}
+
+// goodbye.stencil route
+router.get("/goodbye/:name?") { request, response, next in
+    response.headers["Content-Type"] = "text/html; charset=utf-8"
+    let name = request.parameters["name"]
+    let context: [String: Any] = ["name": name?.webSanitize() as Any]
+    try response.render("goodbye", context: context)
     next()
 }
 
